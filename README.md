@@ -13,4 +13,7 @@ acg uses the configuration file created by the AWS CLI, e.g.
 
 ## Running
 
-`pipenv run python "acg/acg.py"`
+`pipenv run python "acg/acg.py <command> <--project=PROJECT>"`
+
+*command* is list, start, or stop
+*project* is optional
