@@ -18,6 +18,10 @@ def filter_instances(project):
     
     return instances
 
+def has_pending_snapshot(volume):
+    snapshots = list(volume.snapshots.all())
+    return snapshots and snapshots[0].state == 'pending'
+
 @click.group()
 def cli():
     """ACG manages snapshots"""
@@ -78,7 +82,7 @@ def list_volumes(project):
 def instances():
     """Commands for instances"""
 
-@instances.command('Snapshot',
+@instances.command('snapshot',
     help="Create snapshots of all volumes")
 @click.option('--project', default=None,
     help="Only instances for project (tag Project:<name>)")
@@ -88,9 +92,14 @@ def create_snapshots(project):
     instances = filter_instances(project)
 
     for i in instances:
+
         i.stop
         i.wait_until_stopped()
+        
         for v in i.volumes.all():
+            if has_pending_snapshot(v):
+                print("  Skipping {0}. Snapshot already in progress.".format(v.id))
+                continue
             print("Creating snapshot of {0}".format(v,id))
             v.create_snapshot(Description="Created by Snapshotalyzer 30000")
         
